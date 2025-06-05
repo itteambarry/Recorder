@@ -59,7 +59,11 @@ async function startCamera() {
   try {
     const constraints = {
       audio: true,
-      video: { facingMode: "user" }
+      video: { 
+        facingMode: "user",
+        width: { ideal: 960 },
+        height: { ideal: 1280 }
+      }
     };
     mediaStream = await navigator.mediaDevices.getUserMedia(constraints);
     previewVideo.srcObject = mediaStream;
@@ -83,7 +87,7 @@ async function recordFiveSeconds() {
     return;
   }
 
-  // 1) If “Flash” mode, request Fullscreen first
+  // 1) If "Flash" mode, request Fullscreen first
   if (currentMode === "flash01") {
     try {
       await document.documentElement.requestFullscreen();
@@ -92,7 +96,7 @@ async function recordFiveSeconds() {
     }
   }
 
-  // 2) Apply the white‐outside‐oval overlay
+  // 2) Apply the white-outside-oval overlay
   flashOverlay.classList.remove("flashOn");
   if (currentMode === "flash01") {
     flashOverlay.classList.add("flashOn");
@@ -143,7 +147,7 @@ async function recordFiveSeconds() {
     const blob = new Blob(recordedChunks, { type: "video/mp4" });
     downloadBlob(blob);
 
-    // 7) Re‐enable “Start Recording”
+    // 7) Re-enable "Start Recording"
     startRecordBtn.disabled = false;
   };
 

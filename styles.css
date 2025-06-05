@@ -51,28 +51,28 @@ h1 {
 }
 /* Large oval (Video 02 & Flash: 80% × 80% @ 10%/10%) */
 .largeOval {
-  top: 10%;
-  left: 10%;
-  width: 80%;
-  height: 80%;
+  top: 5%;
+  left: 5%;
+  width: 90%;
+  height: 90%;
 }
 
 /* ============== Flash Overlay (outside the oval) ============== */
 #flashOverlay {
-  position: absolute;
+  position: fixed;
   top: 0;
   left: 0;
-  width: 100%;
-  height: 100%;
+  width: 100vw;
+  height: 100vh;
   pointer-events: none;
-  z-index: 1;   /* below guideBorder */
-  opacity: 0;   /* hidden by default */
+  z-index: 2000;   /* on top of everything */
+  opacity: 0;      /* hidden by default */
 }
 /* When we add .flashOn → show orange ring outside the large oval */
 #flashOverlay.flashOn {
   opacity: 1;
 }
-/* Pseudo‐element draws a “hole” in the middle of the orange, matching largeOval */
+/* Pseudo‐element draws a "hole" in the middle of the orange, matching largeOval */
 #flashOverlay.flashOn::before {
   content: "";
   position: absolute;
