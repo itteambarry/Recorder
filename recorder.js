@@ -161,11 +161,11 @@ async function recordFiveSeconds() {
   drawInterval = setInterval(drawToCanvas, 1000 / 30); // 30 FPS
 
   const canvasStream = captureCanvas.captureStream(30);
-  let options = { mimeType: "video/webm; codecs=vp9" };
+  let options = { mimeType: "video/mp4; codecs=avc1" };
   try {
     mediaRecorder = new MediaRecorder(canvasStream, options);
   } catch (e) {
-    console.warn("VP9 codec not supported, falling back to default:", e);
+    console.warn("MP4 codec not supported, falling back to default:", e);
     mediaRecorder = new MediaRecorder(canvasStream);
   }
 
@@ -193,14 +193,15 @@ async function recordFiveSeconds() {
     }
 
     // 6) Download the recorded video
-    const blob = new Blob(recordedChunks, { type: "video/webm" });
+    const blob = new Blob(recordedChunks, { type: "video/mp4" });
     downloadBlob(blob);
 
     // 7) Re-enable "Start Recording"
     startRecordBtn.disabled = false;
   };
 
-  mediaRecorder.start();
+  // Request data every second to ensure we get the full recording
+  mediaRecorder.start(1000);
 
   // 8) Automatically stop after 5 seconds
   setTimeout(() => {
@@ -220,7 +221,7 @@ function toastClose() {
 
 function downloadBlob(blob) {
   modeCounters[currentMode]++;
-  const filename = `VIB_${currentMode}_${modeCounters[currentMode]}.webm`;
+  const filename = `VIB_${currentMode}_${modeCounters[currentMode]}.mp4`;
 
   const url = URL.createObjectURL(blob);
   const a = document.createElement("a");
