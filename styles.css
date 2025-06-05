@@ -73,24 +73,22 @@ h1 {
   opacity: 1;
   background: orange;
 }
-/* Pseudo‐element draws a "hole" in the middle of the orange, matching largeOval */
-#flashOverlay.flashOn::before {
-  content: "";
+#flashHole {
   position: absolute;
   /* Center the oval over the camera feed */
-  left: 50%;
-  top: 50%;
-  width: 90vw;
-  max-width: 400px;
-  aspect-ratio: 1/1;
-  height: 90vw;
-  max-height: 400px;
-  transform: translate(-50%, -50%);
+  left: 5%;
+  top: 5%;
+  width: 90%;
+  height: 90%;
   border-radius: 50%;
   background: transparent;
   box-shadow: 0 0 0 9999px orange;
   pointer-events: none;
   z-index: 1;
+  display: none;
+}
+#flashOverlay.flashOn #flashHole {
+  display: block;
 }
 
 /* If the browser prefixes fullscreen differently, you can copy this rule: */
