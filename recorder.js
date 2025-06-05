@@ -67,13 +67,18 @@ async function startCamera() {
       audio: true,
       video: { 
         facingMode: "user",
-        width: { exact: 960 },
-        height: { exact: 1280 }
+        width: { ideal: 1280 },
+        height: { ideal: 960 }
       }
     };
     mediaStream = await navigator.mediaDevices.getUserMedia(constraints);
     previewVideo.srcObject = mediaStream;
     previewVideo.style.transform = "scaleX(-1)";
+
+    // Log the actual video dimensions
+    const track = mediaStream.getVideoTracks()[0];
+    const settings = track.getSettings();
+    console.log('Actual video dimensions:', settings.width, 'x', settings.height);
 
     startCameraBtn.style.display       = "none";
     modeButtonsContainer.style.display = "block";
@@ -120,31 +125,47 @@ async function recordFiveSeconds() {
 
   // 4) Set up MediaRecorder using canvas stream
   recordedChunks = [];
+  
   // Draw video to canvas at 3:4 aspect ratio
   let drawInterval;
   function drawToCanvas() {
-    // Calculate cropping to maintain 3:4 from the video
-    const videoAspect = previewVideo.videoWidth / previewVideo.videoHeight;
-    const canvasAspect = 960 / 1280;
-    let sx = 0, sy = 0, sw = previewVideo.videoWidth, sh = previewVideo.videoHeight;
-    if (videoAspect > canvasAspect) {
-      // Video is wider than canvas: crop sides
-      sw = previewVideo.videoHeight * canvasAspect;
-      sx = (previewVideo.videoWidth - sw) / 2;
-    } else if (videoAspect < canvasAspect) {
-      // Video is taller than canvas: crop top/bottom
-      sh = previewVideo.videoWidth / canvasAspect;
-      sy = (previewVideo.videoHeight - sh) / 2;
+    const video = previewVideo;
+    const canvas = captureCanvas;
+    const ctx = captureCtx;
+
+    // Clear the canvas
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+    // Calculate the scaling to maintain 3:4 aspect ratio
+    const videoAspect = video.videoWidth / video.videoHeight;
+    const targetAspect = 960 / 1280; // 3:4
+
+    let drawWidth, drawHeight, offsetX = 0, offsetY = 0;
+
+    if (videoAspect > targetAspect) {
+      // Video is wider than target - fit to height
+      drawHeight = canvas.height;
+      drawWidth = drawHeight * videoAspect;
+      offsetX = (canvas.width - drawWidth) / 2;
+    } else {
+      // Video is taller than target - fit to width
+      drawWidth = canvas.width;
+      drawHeight = drawWidth / videoAspect;
+      offsetY = (canvas.height - drawHeight) / 2;
     }
-    captureCtx.drawImage(previewVideo, sx, sy, sw, sh, 0, 0, 960, 1280);
+
+    // Draw the video centered on the canvas
+    ctx.drawImage(video, offsetX, offsetY, drawWidth, drawHeight);
   }
+
   drawInterval = setInterval(drawToCanvas, 1000 / 30); // 30 FPS
 
-  const canvasStream = captureCanvas.captureStream(30); // 30 FPS
+  const canvasStream = captureCanvas.captureStream(30);
   let options = { mimeType: "video/webm; codecs=vp9" };
   try {
     mediaRecorder = new MediaRecorder(canvasStream, options);
   } catch (e) {
+    console.warn("VP9 codec not supported, falling back to default:", e);
     mediaRecorder = new MediaRecorder(canvasStream);
   }
 
