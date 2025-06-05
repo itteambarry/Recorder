@@ -10,6 +10,9 @@ let recordedChunks = [];
 let currentMode = null;
 const modeCounters = { video01: 0, video02: 0, flash01: 0 };
 
+let captureCanvas = null;
+let captureCtx = null;
+
 window.addEventListener("DOMContentLoaded", () => {
   // 1) Grab DOM references
   previewVideo          = document.getElementById("preview");
@@ -21,6 +24,9 @@ window.addEventListener("DOMContentLoaded", () => {
   modeButtonsContainer  = document.getElementById("modeButtons");
   modeBtns              = Array.from(document.getElementsByClassName("modeBtn"));
   startRecordBtn        = document.getElementById("startRecordBtn");
+
+  captureCanvas = document.getElementById("captureCanvas");
+  captureCtx = captureCanvas.getContext("2d");
 
   // 2) Start Camera button
   startCameraBtn.addEventListener("click", startCamera);
@@ -112,13 +118,34 @@ async function recordFiveSeconds() {
     }
   }, 1000);
 
-  // 4) Set up MediaRecorder
+  // 4) Set up MediaRecorder using canvas stream
   recordedChunks = [];
-  let options = { mimeType: "video/mp4; codecs=avc1" };
+  // Draw video to canvas at 3:4 aspect ratio
+  let drawInterval;
+  function drawToCanvas() {
+    // Calculate cropping to maintain 3:4 from the video
+    const videoAspect = previewVideo.videoWidth / previewVideo.videoHeight;
+    const canvasAspect = 960 / 1280;
+    let sx = 0, sy = 0, sw = previewVideo.videoWidth, sh = previewVideo.videoHeight;
+    if (videoAspect > canvasAspect) {
+      // Video is wider than canvas: crop sides
+      sw = previewVideo.videoHeight * canvasAspect;
+      sx = (previewVideo.videoWidth - sw) / 2;
+    } else if (videoAspect < canvasAspect) {
+      // Video is taller than canvas: crop top/bottom
+      sh = previewVideo.videoWidth / canvasAspect;
+      sy = (previewVideo.videoHeight - sh) / 2;
+    }
+    captureCtx.drawImage(previewVideo, sx, sy, sw, sh, 0, 0, 960, 1280);
+  }
+  drawInterval = setInterval(drawToCanvas, 1000 / 30); // 30 FPS
+
+  const canvasStream = captureCanvas.captureStream(30); // 30 FPS
+  let options = { mimeType: "video/webm; codecs=vp9" };
   try {
-    mediaRecorder = new MediaRecorder(mediaStream, options);
+    mediaRecorder = new MediaRecorder(canvasStream, options);
   } catch (e) {
-    mediaRecorder = new MediaRecorder(mediaStream);
+    mediaRecorder = new MediaRecorder(canvasStream);
   }
 
   mediaRecorder.ondataavailable = (e) => {
@@ -129,6 +156,7 @@ async function recordFiveSeconds() {
 
   mediaRecorder.onstop = async () => {
     clearInterval(countdownInterval);
+    clearInterval(drawInterval);
     toastClose();
 
     // 5) Hide the white overlay and exit Fullscreen
@@ -144,7 +172,7 @@ async function recordFiveSeconds() {
     }
 
     // 6) Download the recorded video
-    const blob = new Blob(recordedChunks, { type: "video/mp4" });
+    const blob = new Blob(recordedChunks, { type: "video/webm" });
     downloadBlob(blob);
 
     // 7) Re-enable "Start Recording"
@@ -171,7 +199,7 @@ function toastClose() {
 
 function downloadBlob(blob) {
   modeCounters[currentMode]++;
-  const filename = `VIB_${currentMode}_${modeCounters[currentMode]}.mp4`;
+  const filename = `VIB_${currentMode}_${modeCounters[currentMode]}.webm`;
 
   const url = URL.createObjectURL(blob);
   const a = document.createElement("a");
