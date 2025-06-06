@@ -1,18 +1,21 @@
-/* ================ Reset & Body ================ */Add commentMore actions
+/* ================= Reset & Body ================= */
 * {
   box-sizing: border-box;
   margin: 0;
   padding: 0;
 }
+
 body {
-  background-color: #111;
-  color: #fff;
+  background-color: #fff;    /* Background now white so flash/overlay stands out */
+  color: #111;
   font-family: sans-serif;
   text-align: center;
   padding: 1rem;
 }
+
 h1 {
   margin-bottom: 1rem;
+  color: #222;
 }
 
 /* ================ Camera Container ================ */
@@ -24,32 +27,41 @@ h1 {
   overflow: hidden;
   width: 90vw;
   max-width: 480px;
-  aspect-ratio: 3/4; /* portrait shape */
+  aspect-ratio: 3/4; /* Portrait shape */
   margin: 0 auto 1rem auto;
 }
+
+/* The invisible <video> feeds live camera to a hidden element */
 #preview {
+  display: none;
+}
+
+/* The <canvas> will show the mirrored/rotated portrait preview */
+#mirrorCanvas {
   width: 100%;
   height: 100%;
   object-fit: cover;
-  transform: scaleX(-1);
+  transform-origin: center center;
 }
 
 /* ============= Guide Border (Oval) ============= */
 #guideBorder {
   position: absolute;
   pointer-events: none;
-  border: 3px dashed rgba(0, 200, 0, 0.8);
+  border: 3px dashed rgba(0, 150, 0, 0.8);
   border-radius: 50%;
   z-index: 2; /* on top of flashOverlay */
 }
-/* Small oval (Video 01 mode: 70% × 70% @ 15%/15%) */
+
+/* Small oval (Video 01: 70% × 70% at 15%/15%) */
 .smallOval {
   top: 15%;
   left: 15%;
   width: 70%;
   height: 70%;
 }
-/* Large oval (Video 02 & Flash: 80% × 80% @ 10%/10%) */
+
+/* Large oval (Video 02 & Flash: 90% × 90% at 5%/5%) */
 .largeOval {
   top: 5%;
   left: 5%;
@@ -68,24 +80,24 @@ h1 {
   z-index: 1;   /* below guideBorder */
   opacity: 0;   /* hidden by default */
 }
-/* When we add .flashOn → show orange ring outside the large oval */
+
+/* When flash is on, show an orange ring outside the large oval */
 #flashOverlay.flashOn {
   opacity: 1;
 }
-/* Pseudo‐element draws a "hole" in the middle of the orange, matching largeOval */
+
+/* Pseudo‐element to “cut out” an oval hole in the middle, matching largeOval */
 #flashOverlay.flashOn::before {
   content: "";
   position: absolute;
-  top: 10%;
-  left: 10%;
-  width: 80%;
-  height: 80%;
+  top: 5%;
+  left: 5%;
+  width: 90%;
+  height: 90%;
   border-radius: 50%;
+  /* Orange “infinite” shadow outside the oval */
   box-shadow: 0 0 0 200vmax orange;
 }
-
-/* If the browser prefixes fullscreen differently, you can copy this rule: */
-/* :-webkit-full-screen #flashOverlay { …same as :fullscreen… } */
 
 /* ================ Toast (Countdown) ================ */
 #toast {
@@ -106,6 +118,7 @@ h1 {
 #buttonContainer {
   margin-top: 1rem;
 }
+
 button {
   padding: 0.6rem 1.2rem;
   margin: 0.3rem;
@@ -117,12 +130,14 @@ button {
   cursor: pointer;
   transition: background-color 0.2s;
 }
+
 button:hover {
   background-color: #666;
 }
+
 button:disabled {
-  background-color: #333;
-  color: #777;
+  background-color: #ccc;
+  color: #888;
   cursor: not-allowed;
 }
 
@@ -130,6 +145,7 @@ button:disabled {
 #modeButtons {
   display: none;
 }
+
 #startRecordBtn {
   display: none;
 }

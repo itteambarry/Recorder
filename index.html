@@ -2,33 +2,46 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Face Scan Video Recorder</title>
+  <!-- Ensure the page scales properly on mobile -->
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Face Scan Video Recorder1</title>
   <link rel="stylesheet" href="styles.css" />
 </head>
 <body>
   <h1>Face Scan Video Recorder</h1>
 
+  <!-- Container for live camera preview (hidden until camera starts) -->
   <div id="cameraContainer">
-    <video id="preview" autoplay playsinline></video>
+    <!-- Hidden video element receiving the raw MediaStream -->
+    <video id="preview" autoplay playsinline muted></video>
+    <!-- Canvas that will mirror/rotate the preview into portrait shape -->
+    <canvas id="mirrorCanvas"></canvas>
+    <!-- Oval “guide border” -->
     <div id="guideBorder"></div>
+    <!-- Flash overlay (outside the oval) -->
     <div id="flashOverlay"></div>
   </div>
 
-  <div id="toast">Recording… 5s remaining</div>
+  <!-- Toast message for countdown / errors -->
+  <div id="toast"></div>
 
+  <!-- Buttons container -->
   <div id="buttonContainer">
+    <!-- Start Camera button (visible at first) -->
     <button id="startCameraBtn">Start Camera</button>
 
+    <!-- Mode selection buttons (hidden until camera starts) -->
     <div id="modeButtons">
       <button class="modeBtn" data-mode="video01">Video 01</button>
       <button class="modeBtn" data-mode="video02">Video 02</button>
       <button class="modeBtn" data-mode="flash01">Flash</button>
     </div>
 
+    <!-- Start Recording button (hidden until a mode is selected) -->
     <button id="startRecordBtn">Start Recording</button>
   </div>
 
+  <!-- Include the updated JavaScript logic -->
   <script src="recorder.js"></script>
 </body>
 </html>
