@@ -62,8 +62,7 @@ async function startCamera() {
       video: { 
         facingMode: "user",
         width: { min: 1080, ideal: 1080, max: 1920 },
-        height: { min: 1920, ideal: 1920, max: 3840 },
-        aspectRatio: 0.75  // This enforces 3:4 aspect ratio (portrait)
+        height: { min: 1440, ideal: 1440, max: 2560 }
       }
     };
     mediaStream = await navigator.mediaDevices.getUserMedia(constraints);
