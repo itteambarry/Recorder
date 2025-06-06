@@ -62,13 +62,19 @@ async function startCamera() {
       video: { 
         facingMode: "user",
         width: { min: 1080, ideal: 1080, max: 1920 },
-        height: { min: 1440, ideal: 1440, max: 2560 }
+        height: { min: 1440, ideal: 1440, max: 2560 },
+        resizeMode: "crop-and-scale"
       }
     };
     mediaStream = await navigator.mediaDevices.getUserMedia(constraints);
     previewVideo.srcObject = mediaStream;
     previewVideo.style.transform = "scaleX(-1)";
     previewVideo.muted = true;
+
+    // Force portrait orientation
+    if (previewVideo.videoWidth > previewVideo.videoHeight) {
+      previewVideo.style.transform = "scaleX(-1) rotate(90deg)";
+    }
 
     startCameraBtn.style.display       = "none";
     modeButtonsContainer.style.display = "block";
