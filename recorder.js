@@ -212,8 +212,8 @@ async function recordFiveSeconds() {
     startRecordBtn.disabled = false;
   };
 
-  // Request data every second to ensure we get the full recording
-  mediaRecorder.start(1000);
+  // Request data every 100ms instead of every second for smoother recording
+  mediaRecorder.start(100);
 
   // 8) Automatically stop after 5 seconds
   setTimeout(() => {
