@@ -133,6 +133,10 @@ async function recordFiveSeconds() {
     const canvas = captureCanvas;
     const ctx = captureCtx;
 
+    // Set canvas dimensions to match video dimensions for better quality
+    canvas.width = video.videoWidth;
+    canvas.height = video.videoHeight;
+
     // Clear the canvas
     ctx.clearRect(0, 0, canvas.width, canvas.height);
 
@@ -154,14 +158,22 @@ async function recordFiveSeconds() {
       offsetY = (canvas.height - drawHeight) / 2;
     }
 
+    // Enable image smoothing for better quality
+    ctx.imageSmoothingEnabled = true;
+    ctx.imageSmoothingQuality = 'high';
+
     // Draw the video centered on the canvas
     ctx.drawImage(video, offsetX, offsetY, drawWidth, drawHeight);
   }
 
-  drawInterval = setInterval(drawToCanvas, 1000 / 30); // 30 FPS
+  // Increase frame rate to 60 FPS for smoother video
+  drawInterval = setInterval(drawToCanvas, 1000 / 60);
 
-  const canvasStream = captureCanvas.captureStream(30);
-  let options = { mimeType: "video/mp4; codecs=avc1" };
+  const canvasStream = captureCanvas.captureStream(60);
+  let options = { 
+    mimeType: "video/mp4; codecs=avc1",
+    videoBitsPerSecond: 8000000 // 8 Mbps for better quality
+  };
   try {
     mediaRecorder = new MediaRecorder(canvasStream, options);
   } catch (e) {
