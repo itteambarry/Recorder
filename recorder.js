@@ -74,6 +74,7 @@ async function startCamera() {
     mediaStream = await navigator.mediaDevices.getUserMedia(constraints);
     previewVideo.srcObject = mediaStream;
     previewVideo.style.transform = "scaleX(-1)";
+    previewVideo.muted = true;
 
     // Log the actual video dimensions
     const track = mediaStream.getVideoTracks()[0];
@@ -158,27 +159,25 @@ async function recordFiveSeconds() {
       offsetY = (canvas.height - drawHeight) / 2;
     }
 
-    // Enable image smoothing for better quality
-    ctx.imageSmoothingEnabled = true;
-    ctx.imageSmoothingQuality = 'high';
-
     // Draw the video centered on the canvas
     ctx.drawImage(video, offsetX, offsetY, drawWidth, drawHeight);
   }
 
-  // Increase frame rate to 60 FPS for smoother video
-  drawInterval = setInterval(drawToCanvas, 1000 / 60);
+  drawInterval = setInterval(drawToCanvas, 1000 / 30); // Back to 30 FPS for stability
 
-  const canvasStream = captureCanvas.captureStream(60);
-  let options = { 
-    mimeType: "video/mp4; codecs=avc1",
-    videoBitsPerSecond: 8000000 // 8 Mbps for better quality
-  };
+  const canvasStream = captureCanvas.captureStream(30);
+  let options = { mimeType: "video/webm;codecs=vp9" };
   try {
     mediaRecorder = new MediaRecorder(canvasStream, options);
   } catch (e) {
-    console.warn("MP4 codec not supported, falling back to default:", e);
-    mediaRecorder = new MediaRecorder(canvasStream);
+    console.warn("VP9 codec not supported, trying VP8:", e);
+    options = { mimeType: "video/webm;codecs=vp8" };
+    try {
+      mediaRecorder = new MediaRecorder(canvasStream, options);
+    } catch (e) {
+      console.warn("VP8 codec not supported, falling back to default:", e);
+      mediaRecorder = new MediaRecorder(canvasStream);
+    }
   }
 
   mediaRecorder.ondataavailable = (e) => {
@@ -205,15 +204,15 @@ async function recordFiveSeconds() {
     }
 
     // 6) Download the recorded video
-    const blob = new Blob(recordedChunks, { type: "video/mp4" });
+    const blob = new Blob(recordedChunks, { type: mediaRecorder.mimeType });
     downloadBlob(blob);
 
     // 7) Re-enable "Start Recording"
     startRecordBtn.disabled = false;
   };
 
-  // Request data every 100ms instead of every second for smoother recording
-  mediaRecorder.start(100);
+  // Start recording with a single data chunk
+  mediaRecorder.start();
 
   // 8) Automatically stop after 5 seconds
   setTimeout(() => {
