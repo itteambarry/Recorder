@@ -4,20 +4,20 @@
   <meta charset="UTF-8" />
   <!-- Ensure the page scales properly on mobile -->
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Face Scan Video Recorder1</title>
+  <title>Face Scan Video Recorder</title>
   <link rel="stylesheet" href="styles.css" />
 </head>
 <body>
   <h1>Face Scan Video Recorder</h1>
 
-  <!-- Container for live camera preview (hidden until camera starts) -->
+  <!-- Camera Container (portrait shaped) -->
   <div id="cameraContainer">
-    <!-- Hidden video element receiving the raw MediaStream -->
+    <!-- The video element now directly displays the camera feed, no canvas -->
     <video id="preview" autoplay playsinline muted></video>
-    <!-- Canvas that will mirror/rotate the preview into portrait shape -->
-    <canvas id="mirrorCanvas"></canvas>
-    <!-- Oval “guide border” -->
+
+    <!-- Oval guide border (small or large) -->
     <div id="guideBorder"></div>
+
     <!-- Flash overlay (outside the oval) -->
     <div id="flashOverlay"></div>
   </div>
@@ -25,23 +25,23 @@
   <!-- Toast message for countdown / errors -->
   <div id="toast"></div>
 
-  <!-- Buttons container -->
+  <!-- Buttons Container -->
   <div id="buttonContainer">
-    <!-- Start Camera button (visible at first) -->
+    <!-- 1) Start Camera (visible initially) -->
     <button id="startCameraBtn">Start Camera</button>
 
-    <!-- Mode selection buttons (hidden until camera starts) -->
+    <!-- 2) Mode Buttons (hidden until camera starts) -->
     <div id="modeButtons">
       <button class="modeBtn" data-mode="video01">Video 01</button>
       <button class="modeBtn" data-mode="video02">Video 02</button>
       <button class="modeBtn" data-mode="flash01">Flash</button>
     </div>
 
-    <!-- Start Recording button (hidden until a mode is selected) -->
+    <!-- 3) Start Recording (hidden until a mode is selected) -->
     <button id="startRecordBtn">Start Recording</button>
   </div>
 
-  <!-- Include the updated JavaScript logic -->
+  <!-- Link to updated JavaScript -->
   <script src="recorder.js"></script>
 </body>
 </html>
