@@ -10,9 +10,6 @@ let recordedChunks = [];
 let currentMode = null;
 const modeCounters = { video01: 0, video02: 0, flash01: 0 };
 
-let captureCanvas = null;
-let captureCtx = null;
-
 window.addEventListener("DOMContentLoaded", () => {
   // 1) Grab DOM references
   previewVideo          = document.getElementById("preview");
@@ -24,9 +21,6 @@ window.addEventListener("DOMContentLoaded", () => {
   modeButtonsContainer  = document.getElementById("modeButtons");
   modeBtns              = Array.from(document.getElementsByClassName("modeBtn"));
   startRecordBtn        = document.getElementById("startRecordBtn");
-
-  captureCanvas = document.getElementById("captureCanvas");
-  captureCtx = captureCanvas.getContext("2d");
 
   // 2) Start Camera button
   startCameraBtn.addEventListener("click", startCamera);
@@ -67,19 +61,13 @@ async function startCamera() {
       audio: true,
       video: { 
         facingMode: "user",
-        width: { ideal: 1280 },
-        height: { ideal: 960 }
+        width: { ideal: 960 },
+        height: { ideal: 1280 }
       }
     };
     mediaStream = await navigator.mediaDevices.getUserMedia(constraints);
     previewVideo.srcObject = mediaStream;
     previewVideo.style.transform = "scaleX(-1)";
-    previewVideo.muted = true;
-
-    // Log the actual video dimensions
-    const track = mediaStream.getVideoTracks()[0];
-    const settings = track.getSettings();
-    console.log('Actual video dimensions:', settings.width, 'x', settings.height);
 
     startCameraBtn.style.display       = "none";
     modeButtonsContainer.style.display = "block";
@@ -124,60 +112,13 @@ async function recordFiveSeconds() {
     }
   }, 1000);
 
-  // 4) Set up MediaRecorder using canvas stream
+  // 4) Set up MediaRecorder
   recordedChunks = [];
-  
-  // Draw video to canvas at 3:4 aspect ratio
-  let drawInterval;
-  function drawToCanvas() {
-    const video = previewVideo;
-    const canvas = captureCanvas;
-    const ctx = captureCtx;
-
-    // Set canvas dimensions to match video dimensions for better quality
-    canvas.width = video.videoWidth;
-    canvas.height = video.videoHeight;
-
-    // Clear the canvas
-    ctx.clearRect(0, 0, canvas.width, canvas.height);
-
-    // Calculate the scaling to maintain 3:4 aspect ratio
-    const videoAspect = video.videoWidth / video.videoHeight;
-    const targetAspect = 960 / 1280; // 3:4
-
-    let drawWidth, drawHeight, offsetX = 0, offsetY = 0;
-
-    if (videoAspect > targetAspect) {
-      // Video is wider than target - fit to height
-      drawHeight = canvas.height;
-      drawWidth = drawHeight * videoAspect;
-      offsetX = (canvas.width - drawWidth) / 2;
-    } else {
-      // Video is taller than target - fit to width
-      drawWidth = canvas.width;
-      drawHeight = drawWidth / videoAspect;
-      offsetY = (canvas.height - drawHeight) / 2;
-    }
-
-    // Draw the video centered on the canvas
-    ctx.drawImage(video, offsetX, offsetY, drawWidth, drawHeight);
-  }
-
-  drawInterval = setInterval(drawToCanvas, 1000 / 30); // Back to 30 FPS for stability
-
-  const canvasStream = captureCanvas.captureStream(30);
-  let options = { mimeType: "video/webm;codecs=vp9" };
+  let options = { mimeType: "video/mp4; codecs=avc1" };
   try {
-    mediaRecorder = new MediaRecorder(canvasStream, options);
+    mediaRecorder = new MediaRecorder(mediaStream, options);
   } catch (e) {
-    console.warn("VP9 codec not supported, trying VP8:", e);
-    options = { mimeType: "video/webm;codecs=vp8" };
-    try {
-      mediaRecorder = new MediaRecorder(canvasStream, options);
-    } catch (e) {
-      console.warn("VP8 codec not supported, falling back to default:", e);
-      mediaRecorder = new MediaRecorder(canvasStream);
-    }
+    mediaRecorder = new MediaRecorder(mediaStream);
   }
 
   mediaRecorder.ondataavailable = (e) => {
@@ -188,7 +129,6 @@ async function recordFiveSeconds() {
 
   mediaRecorder.onstop = async () => {
     clearInterval(countdownInterval);
-    clearInterval(drawInterval);
     toastClose();
 
     // 5) Hide the white overlay and exit Fullscreen
@@ -204,14 +144,13 @@ async function recordFiveSeconds() {
     }
 
     // 6) Download the recorded video
-    const blob = new Blob(recordedChunks, { type: mediaRecorder.mimeType });
+    const blob = new Blob(recordedChunks, { type: "video/mp4" });
     downloadBlob(blob);
 
     // 7) Re-enable "Start Recording"
     startRecordBtn.disabled = false;
   };
 
-  // Start recording with a single data chunk
   mediaRecorder.start();
 
   // 8) Automatically stop after 5 seconds
@@ -226,6 +165,7 @@ function toastOpen(message) {
   toast.textContent = message;
   toast.style.display = "block";
 }
+
 function toastClose() {
   toast.style.display = "none";
 }
