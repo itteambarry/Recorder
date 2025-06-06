@@ -61,8 +61,8 @@ async function startCamera() {
       audio: true,
       video: { 
         facingMode: "user",
-        width: { ideal:  1080 },  // Request 4K resolution
-        height: { ideal:  1920 }
+        width: { min: 1080, ideal: 1080, max: 1920 },
+        height: { min: 1920, ideal: 1920, max: 3840 }
       }
     };
     mediaStream = await navigator.mediaDevices.getUserMedia(constraints);
