@@ -61,19 +61,14 @@ async function startCamera() {
       audio: true,
       video: { 
         facingMode: "user",
-        width: { ideal: 3840 },  // Request 4K resolution
-        height: { ideal: 2160 }
+        width: { ideal:  2160 },  // Request 4K resolution
+        height: { ideal: 3840 }
       }
     };
     mediaStream = await navigator.mediaDevices.getUserMedia(constraints);
     previewVideo.srcObject = mediaStream;
     previewVideo.style.transform = "scaleX(-1)";
     previewVideo.muted = true;
-
-    // Log the actual video dimensions
-    const track = mediaStream.getVideoTracks()[0];
-    const settings = track.getSettings();
-    console.log('Actual video dimensions:', settings.width, 'x', settings.height);
 
     startCameraBtn.style.display       = "none";
     modeButtonsContainer.style.display = "block";
